@@ -8,6 +8,7 @@ import tensorflow as tf
 import random
 import matplotlib.pyplot as plt
 import matplotlib.image
+from flask_cors import cross_origin, CORS
 
 
 from tensorflow import keras
@@ -129,8 +130,20 @@ def upload_image():
         classes = ['Mild Cognitive Impairment','Alzheimers Disease', 'Cognitively Normal']
         temp = A1_model.predict(np.array([volume]))
         print('Class and image_path',classes[np.argmax(temp[0])],img_path)
-    return classes[np.argmax(temp[0])],img_path
+    response = classes[np.argmax(temp[0])] + '^' +  img_path
+    return {"output": response}
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    return response
 
 if __name__ == "__main__":
+    CORS(app, supports_credentials=True)
+    cors = CORS(app, resource={
+        r"/*":{
+            "origins":"*"
+        }
+    })
     app.run()
